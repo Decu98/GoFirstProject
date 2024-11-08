@@ -7,6 +7,7 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gofiber/template/pug/v2"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,14 +26,20 @@ func main() {
 	}
 	defer db.Close()
 
-	getQuery(db)
-
-	app := fiber.New()
+	engine := pug.New("./views", ".pug")
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
 
 	app.Get("/", indexHandler)
-	app.Get("/SQL", func(c *fiber.Ctx) error {
-		id, name := getQuery(db)
-		return c.SendString(fmt.Sprintf("ID: %v, Name: %v", id, name))
+
+	app.Get("/SQLIndex", func(c *fiber.Ctx) error {
+		data := getQuery(db)
+		return c.Render("sql", fiber.Map{
+			"Title":  "Hello",
+			"pple":   data,
+			"length": len(data),
+		}, "layouts/main")
 	})
 
 	app.Post("/", postHandler) // Add this
@@ -49,8 +56,11 @@ func main() {
 }
 
 func indexHandler(c *fiber.Ctx) error {
-	return c.SendString("Hello")
+	return c.Render("index", fiber.Map{
+		"Title": "PUG!",
+	}, "layouts/main")
 }
+
 func postHandler(c *fiber.Ctx) error {
 	return c.SendString("Hello")
 }
@@ -61,9 +71,8 @@ func deleteHandler(c *fiber.Ctx) error {
 	return c.SendString("Hello")
 }
 
-func getQuery(db *sql.DB) (int, string) {
-	id := 0
-	name := ""
+func getQuery(db *sql.DB) []DateSQL {
+	result := []DateSQL{}
 	results, err := db.Query("SELECT * FROM data")
 	if err != nil {
 		log.Fatal(err)
@@ -74,8 +83,7 @@ func getQuery(db *sql.DB) (int, string) {
 		if err != nil {
 			panic(err.Error())
 		}
-		id += data.ID
-		name += data.NAME
+		result = append(result, data)
 	}
-	return id, name
+	return result
 }

@@ -1,0 +1,10 @@
+
+h1 #{.Title}
+table.table.table-striped
+    tr
+      th(scope='col') ID
+      th(scope='col') Name
+    for n in {{.data}} 
+        tr
+            td= n.ID
+            td= n.Name
