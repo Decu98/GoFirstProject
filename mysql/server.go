@@ -6,10 +6,11 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/gofiber/template/pug/v2"
+	"encoding/json"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html/v2"
 )
 
 type DateSQL struct {
@@ -26,20 +27,26 @@ func main() {
 	}
 	defer db.Close()
 
-	engine := pug.New("./views", ".pug")
+	engine := html.New("./views", ".html")
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
 
 	app.Get("/", indexHandler)
 
+	app.Get("/scripts/*", func(c *fiber.Ctx) error {
+		script := c.Params("*")
+		response := "./scripts/" + script
+		return c.SendFile(response, true)
+	})
+
 	app.Get("/SQLIndex", func(c *fiber.Ctx) error {
 		data := getQuery(db)
-		return c.Render("sql", fiber.Map{
-			"Title":  "Hello",
-			"pple":   data,
-			"length": len(data),
-		}, "layouts/main")
+		out, err := json.Marshal(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return c.JSON(string(out))
 	})
 
 	app.Post("/", postHandler) // Add this
@@ -57,7 +64,7 @@ func main() {
 
 func indexHandler(c *fiber.Ctx) error {
 	return c.Render("index", fiber.Map{
-		"Title": "PUG!",
+		"Title": "Hello, World!",
 	}, "layouts/main")
 }
 

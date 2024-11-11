@@ -1,0 +1,27 @@
+{{template "partials/header" .}}
+<div class="container px-4 text-center">
+    <div class="row gx-5">
+        <div class="col">
+            <div class="p-3">
+                <button id="BPrimary" type="button" class="btn btn-primary">Query Data</button>
+            </div>
+        </div>
+        <div class="col">
+            <div class="p-3">
+                <a id="BSecondary" class="btn btn-primary" role="button">Secondary</a>
+            </div>
+        </div>
+    </div>
+</div>
+<table id="TData" class="invisible table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+      </tr>
+    </thead>
+    <tbody id="TBData">
+    </tbody>
+  </table>
+<script type="text/javascript" src="/scripts/index.js"></script>
+{{template "partials/footer" .}}
